@@ -2,8 +2,8 @@ package StreamingDataFlow.testProject;
 import com.google.api.services.bigquery.model.TableRow;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.coders.TableRowJsonCoder;
+import com.google.cloud.dataflow.sdk.io.BigQueryIO;
 import com.google.cloud.dataflow.sdk.io.PubsubIO;
-import com.google.cloud.dataflow.sdk.io.TextIO;
 import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
 import com.google.cloud.dataflow.sdk.runners.DataflowPipelineRunner;
 import com.google.cloud.dataflow.sdk.transforms.DoFn;
@@ -35,18 +35,18 @@ public class AllRides {
   // "passenger_count":2
   // }
 
-  private static class PassThroughAllRides extends DoFn<TableRow, String> {
+  private static class PassThroughAllRides extends DoFn<TableRow, TableRow> {
     PassThroughAllRides() {}
 
     @Override
     public void processElement(ProcessContext c) throws IOException {
-      TableRow ride = c.element();
+      TableRow ride =new TableRow().set("data", c.element()) ;
       
       // Access to data fields:
       // float lat = Float.parseFloat(ride.get("latitude").toString());
       // float lon = Float.parseFloat(ride.get("longitude").toString());
-
-      c.output(ride.toPrettyString());
+      
+      c.output(ride);
     }
   }
 
@@ -86,8 +86,10 @@ public class AllRides {
 //              return a;
 //            }).withOutputType(TypeDescriptor.of(TableRow.class)))
 
-     .apply(TextIO.Write.named("write to PubSub").to("gs://synpuf-data/streamingFile.txt"));
-    		 //.topic(String.format("projects/%s/topics/%s", options.getSinkProject(), options.getSinkTopic())).withCoder(TableRowJsonCoder.of()));
-    p.run();
+     //.apply(PubsubIO.Write.named("write to PubSub").topic(String.format("projects/%s/topics/%s", options.getSinkProject(), options.getSinkTopic())).withCoder(TableRowJsonCoder.of()));
+     .apply(BigQueryIO.Write.named("Writeing to Big Querry").to("healthcare-12:wordcount_dataset.streamingTest")
+				.withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
+				.withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER));
+     p.run();
   }
 }
