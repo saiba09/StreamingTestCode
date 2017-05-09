@@ -42,13 +42,13 @@ public class AllRides {
 
     @Override
     public void processElement(ProcessContext c) throws IOException {
-      TableRow ride =new TableRow().set("data", c.element()) ;
+     //TableRow ride =new TableRow().set("data", c.element()) ;
       
       // Access to data fields:
       // float lat = Float.parseFloat(ride.get("latitude").toString());
       // float lon = Float.parseFloat(ride.get("longitude").toString());
       
-      c.output(ride);
+      c.output(c.element());
     }
   }
 
@@ -63,7 +63,16 @@ public class AllRides {
 	options.setZone("europe-west1-c");
     Pipeline p = Pipeline.create(options);
     List<TableFieldSchema> fields = new ArrayList<>();
-    fields.add(new TableFieldSchema().setName("data").setType("STRING"));
+    fields.add(new TableFieldSchema().setName("ride_id").setType("STRING"));
+    fields.add(new TableFieldSchema().setName("passenger_count").setType("INTEGER"));
+    fields.add(new TableFieldSchema().setName("ride_status").setType("STRING"));
+    fields.add(new TableFieldSchema().setName("timestamp").setType("STRING"));
+    fields.add(new TableFieldSchema().setName("longitude").setType("STRING"));
+    fields.add(new TableFieldSchema().setName("meter_increment").setType("FLOAT"));
+    fields.add(new TableFieldSchema().setName("meter_reading").setType("FLOAT"));
+    fields.add(new TableFieldSchema().setName("latitude").setType("STRING"));
+
+
     TableSchema schema = new TableSchema().setFields(fields);
     p.apply(PubsubIO.Read.named("read from PubSub")
         .topic(String.format("projects/%s/topics/%s", options.getSourceProject(), options.getSourceTopic()))
@@ -91,7 +100,7 @@ public class AllRides {
 //            }).withOutputType(TypeDescriptor.of(TableRow.class)))
 
      //.apply(PubsubIO.Write.named("write to PubSub").topic(String.format("projects/%s/topics/%s", options.getSinkProject(), options.getSinkTopic())).withCoder(TableRowJsonCoder.of()));
-     .apply(BigQueryIO.Write.named("Writeing to Big Querry").to("healthcare-12:wordcount_dataset.streamingTest")
+     .apply(BigQueryIO.Write.named("Writeing to Big Querry").to("healthcare-12:wordcount_dataset.streamingTest123")
     		 .withSchema(schema)
     	      .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
     	      .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
