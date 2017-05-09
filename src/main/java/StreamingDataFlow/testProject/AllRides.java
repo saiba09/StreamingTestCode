@@ -1,5 +1,7 @@
 package StreamingDataFlow.testProject;
+import com.google.api.services.bigquery.model.TableFieldSchema;
 import com.google.api.services.bigquery.model.TableRow;
+import com.google.api.services.bigquery.model.TableSchema;
 import com.google.cloud.dataflow.sdk.Pipeline;
 import com.google.cloud.dataflow.sdk.coders.TableRowJsonCoder;
 import com.google.cloud.dataflow.sdk.io.BigQueryIO;
@@ -60,7 +62,9 @@ public class AllRides {
 	options.setNumWorkers(3);
 	options.setZone("europe-west1-c");
     Pipeline p = Pipeline.create(options);
-
+    List<TableFieldSchema> fields = new ArrayList<>();
+    fields.add(new TableFieldSchema().setName("data").setType("STRING"));
+    TableSchema schema = new TableSchema().setFields(fields);
     p.apply(PubsubIO.Read.named("read from PubSub")
         .topic(String.format("projects/%s/topics/%s", options.getSourceProject(), options.getSourceTopic()))
         .timestampLabel("ts")
@@ -88,8 +92,9 @@ public class AllRides {
 
      //.apply(PubsubIO.Write.named("write to PubSub").topic(String.format("projects/%s/topics/%s", options.getSinkProject(), options.getSinkTopic())).withCoder(TableRowJsonCoder.of()));
      .apply(BigQueryIO.Write.named("Writeing to Big Querry").to("healthcare-12:wordcount_dataset.streamingTest")
-				.withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
-				.withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER));
+    		 .withSchema(schema)
+    	      .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
+    	      .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
      p.run();
   }
 }
