@@ -93,7 +93,7 @@ public class AllRides {
      //.apply(PubsubIO.Write.named("write to PubSub").topic(String.format("projects/%s/topics/%s", options.getSinkProject(), options.getSinkTopic())).withCoder(TableRowJsonCoder.of()));
      .apply(BigQueryIO.Write.named("Writeing to Big Querry").to("healthcare-12:wordcount_dataset.streamingTest")
     		 .withSchema(schema)
-    	      .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
+    	      .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
     	      .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
      p.run();
   }
