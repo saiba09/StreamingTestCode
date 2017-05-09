@@ -42,13 +42,21 @@ public class AllRides {
 
     @Override
     public void processElement(ProcessContext c) throws IOException {
-     //TableRow ride =new TableRow().set("data", c.element()) ;
+     	    TableRow obj = c.element();
+	       float lat = Float.parseFloat(ride.get("latitude").toString());
+       float lon = Float.parseFloat(ride.get("longitude").toString());
+	    int pc = Integer.parseInt(obj.get("passenger_count").toString());
+	           float mr = Float.parseFloat(ride.get("meter_reading").toString());
+       float mi = Float.parseFloat(ride.get("meter_increment").toString());
+
+	    TableRow ride =new TableRow().set("ride_id", obj.get("ride_id").toString).set("latitude",lat).set("longitude",lon)
+		    .set("timestamp",obj.get("timestamp").toString()).set("ride_status" , obj.get("ride_status"))
+		    .set("passenger_count",pc).set("meter_increment",mi).set("meter_reading",mr);
       
       // Access to data fields:
-      // float lat = Float.parseFloat(ride.get("latitude").toString());
-      // float lon = Float.parseFloat(ride.get("longitude").toString());
+    
       
-      c.output(c.element());
+      c.output(ride);
     }
   }
 
